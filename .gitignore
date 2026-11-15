@@ -14,3 +14,6 @@ RustyMod.log
 .idea/
 Thumbs.db
 desktop.ini
+
+# Local editor config
+.kiro/
