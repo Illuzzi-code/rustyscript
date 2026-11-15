@@ -87,13 +87,16 @@ tested      = false
 
 [[native]]
 name        = "player.wanted_level"
-address     = "direct_write"
-offset_chain= ["0xB74490", "+0x00", "+0x484", "+0x08"]
+address     = "0x00609F10"
+convention  = "thiscall"
+signature   = "fn(this: *mut CPed, level: i32)"
+read_chain  = ["0xB7CD98", "+0x00", "+0x480", "+0x00", "+0x2C"]
 type        = "u32"
 clamp       = "0..6"
-confidence  = "medium"
+confidence  = "high"
 active      = false
-evidence    = "docs/evidence/ped_offsets.md"
+evidence    = "docs/evidence/wanted.md"
+note        = "No escribir +0x2C directamente: SetWantedLevel fija el caos (+0x00) y recalcula el nivel."
 tested      = false
 
 # ── Pantalla ───────────────────────────────────────────────────────────────
@@ -205,3 +208,302 @@ tested      = false
 # give_weapon: función no verificada en este binario.
 # CPed::AddWeapon @ 0x4474A0 (plugin-sdk) es interior de código (0 callers).
 # Estado: BAJA confianza — no se incluye hasta análisis con Ghidra.
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Investigado en binario, NO implementado todavía (active = false).
+# Cada entrada remite a su ficha de evidencia con firma, xrefs y secuencia.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── Actores (peds) ─────────────────────────────────────────────────────────
+
+[[native]]
+name        = "request_model"
+address     = "0x4087E0"
+convention  = "cdecl"
+signature   = "fn(model: i32, flags: u32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+note        = "Opcode 0x0247 usa flags 0xC. Hace falta antes de create_actor."
+tested      = false
+
+[[native]]
+name        = "has_model_loaded"
+address     = "0x008E4CD0"
+type        = "u8"
+stride      = "0x14"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+note        = "Opcode 0x0248: [0x8E4CD0 + modelo*0x14] == 1"
+tested      = false
+
+[[native]]
+name        = "load_all_models"
+address     = "0x0249"
+convention  = "scm_opcode"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+tested      = false
+
+[[native]]
+name        = "create_actor"
+address     = "scm:0x009A"
+convention  = "scm_handler"
+signature   = "fn(ped_type: i32, model: i32, x: f32, y: f32, z: f32) -> handle"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+note        = "Caso 0x36 del bloque 100. Ctor según pedType; tarea standstill; SetCreatedBy(2); z += 1.0f."
+tested      = false
+
+[[native]]
+name        = "delete_actor"
+address     = "0x486240"
+convention  = "thiscall"
+signature   = "fn(ped: *mut CPed)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+note        = "Opcode 0x009B. El handle queda inválido tras borrar."
+tested      = false
+
+[[native]]
+name        = "get_actor_coords"
+address     = "scm:0x00A0"
+convention  = "scm_handler"
+signature   = "fn(handle: i32) -> (f32, f32, f32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+tested      = false
+
+[[native]]
+name        = "set_actor_coords"
+address     = "0x464DC0"
+convention  = "cdecl"
+signature   = "fn(ped: *mut CPed, x: f32, y: f32, z: f32, arg4: u8, arg5: u8)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+note        = "Opcode 0x00A1."
+tested      = false
+
+[[native]]
+name        = "ped_handle_to_ptr"
+address     = "0x54FF90"
+convention  = "cdecl"
+signature   = "fn(handle: i32) -> *mut CPed"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+note        = "CPools::GetPed. Handle = (índice<<8)|contador; devuelve 0 si es inválido."
+tested      = false
+
+[[native]]
+name        = "ped_ptr_to_handle"
+address     = "0x54FF60"
+convention  = "cdecl"
+signature   = "fn(ped: *const CPed) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/actors.md"
+tested      = false
+
+# ── Blips del radar ────────────────────────────────────────────────────────
+
+[[native]]
+name        = "add_blip_coord"
+address     = "0x583820"
+convention  = "cdecl"
+signature   = "fn(kind: u8, x: f32, y: f32, z: f32, arg5: u32, display: u8, name: *const u8) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+note        = "CRadar::SetCoordBlip. Fuerza color 8, escala 1; 175 slots."
+tested      = false
+
+[[native]]
+name        = "add_blip_sprite"
+address     = "scm:0x02A8"
+convention  = "scm_handler"
+signature   = "fn(x: f32, y: f32, z: f32, sprite: i32) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+tested      = false
+
+[[native]]
+name        = "add_blip_contact"
+address     = "scm:0x02A7"
+convention  = "scm_handler"
+signature   = "fn(x: f32, y: f32, z: f32, sprite: i32) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+tested      = false
+
+[[native]]
+name        = "add_blip_entity"
+address     = "0x5839A0"
+convention  = "cdecl"
+signature   = "fn(kind: i32, entity: u32, arg3: u32, display: u8) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+note        = "Color forzado: 7 para coche/ped, 1 para el resto."
+tested      = false
+
+[[native]]
+name        = "set_blip_colour"
+address     = "0x583AB0"
+convention  = "cdecl"
+signature   = "fn(blip: i32, colour: u32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+tested      = false
+
+[[native]]
+name        = "set_blip_scale"
+address     = "0x583CC0"
+convention  = "cdecl"
+signature   = "fn(blip: i32, size: u16)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+tested      = false
+
+[[native]]
+name        = "set_blip_sprite"
+address     = "0x583D70"
+convention  = "cdecl"
+signature   = "fn(blip: i32, sprite: u8)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+note        = "Válido 1..63."
+tested      = false
+
+[[native]]
+name        = "set_blip_display"
+address     = "0x583D20"
+convention  = "cdecl"
+signature   = "fn(blip: i32, display: u32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+tested      = false
+
+[[native]]
+name        = "remove_blip"
+address     = "0x587CE0"
+convention  = "cdecl"
+signature   = "fn(blip: i32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/blips.md"
+tested      = false
+
+# ── Marcadores y coronas ───────────────────────────────────────────────────
+
+[[native]]
+name        = "marker_icon"
+address     = "scm:0x04CE"
+convention  = "scm_handler"
+signature   = "fn(x: f32, y: f32, z: f32, sprite: i32) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/markers.md"
+note        = "SetShortRangeCoordBlip(4,…) + SetBlipSprite. Es un blip, no geometría."
+tested      = false
+
+[[native]]
+name        = "marker_asset"
+address     = "scm:0x0570"
+convention  = "scm_handler"
+signature   = "fn(x: f32, y: f32, z: f32, sprite: i32) -> i32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/markers.md"
+note        = "Tipo 5 (contact point). La tabla pública de opcodes lo documenta como <int,flt,flt,flt>: probar en juego."
+tested      = false
+
+[[native]]
+name        = "corona_register"
+address     = "0x6FC580"
+convention  = "cdecl"
+signature   = "fn(id: u32, attach: *mut CEntity, r: u8, g: u8, b: u8, a: u8, pos: *const CVector, radius: f32, far_clip: f32, kind: u8, flare: u8, reflection: u8, obstacles: u8, unused: i32, angle: f32, long_distance: u8, near_clip: f32, fade_state: u8, fade_speed: f32, from_below: u8, reflection_delay: u8)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/markers.md"
+note        = "Valida kind contra gpCoronaTexture (0xC3E000) SIN comprobar rango: usar 0..8. 64 slots."
+tested      = false
+
+[[native]]
+name        = "corona_register_texture"
+address     = "0x6FC180"
+convention  = "cdecl"
+signature   = "fn(id: u32, attach: *mut CEntity, r: u8, g: u8, b: u8, a: u8, pos: *const CVector, radius: f32, far_clip: f32, texture: *mut RwTexture, flare: u8, reflection: u8, obstacles: u8, unused: i32, angle: f32, long_distance: u8, near_clip: f32, fade_state: u8, fade_speed: f32, from_below: u8, reflection_delay: u8)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/markers.md"
+tested      = false
+
+# ── Nivel de búsqueda (wanted) ─────────────────────────────────────────────
+
+[[native]]
+name        = "player.wanted_no_drop"
+address     = "0x00609F30"
+convention  = "thiscall"
+signature   = "fn(this: *mut CPed, level: i32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/wanted.md"
+note        = "Opcode 0x010E: solo sube el nivel."
+tested      = false
+
+[[native]]
+name        = "player.clear_wanted"
+address     = "0x00609F10"
+convention  = "thiscall"
+signature   = "fn(this: *mut CPed, level: i32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/wanted.md"
+note        = "Opcode 0x0110 llama con level = 0."
+tested      = false
+
+[[native]]
+name        = "player.max_wanted"
+address     = "0x00561E70"
+convention  = "cdecl"
+signature   = "fn(level: i32)"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/wanted.md"
+note        = "Escribe 0x8CDEE4 y 0x8CDEE8; >6 se ignora. Lectura: 0x8CDEE4:u32."
+tested      = false
+
+[[native]]
+name        = "player.wanted_multiplier"
+address     = "direct_write"
+offset_chain= ["0xB7CD98", "+0x04", "+0x00", "+0x14"]
+type        = "f32"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/wanted.md"
+note        = "CWanted::m_fMultiplier. Opcode 0x03C7 usa el jugador en foco (0xB7CD74)."
+tested      = false
+
+[[native]]
+name        = "player.is_wanted"
+address     = "0x0056E230"
+convention  = "cdecl"
+signature   = "fn(player_index: i32) -> *mut CWanted"
+confidence  = "high"
+active      = false
+evidence    = "docs/evidence/wanted.md"
+note        = "Comparar nivel < CWanted->m_nWantedLevel (+0x2C). Índices <0 usan PlayerInFocus."
+tested      = false

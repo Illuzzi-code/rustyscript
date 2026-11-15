@@ -246,9 +246,62 @@ spawn_hotring()     # Spawna un Hotring Racer
 Estas aparecen en la especificación pero generan `error[E01]` si se usan:
 ```
 player.money        # i32
-player.wanted_level # int 0-6
+player.wanted_level # int 0-6 (r/w; usa CPed::SetWantedLevel, no escritura directa)
 spawn_vehicle(model_id: int)
 ```
+
+### Investigado en binario, aún sin native (fase de evidencia)
+
+Las fichas de `docs/evidence/` ya tienen firma, xrefs y secuencia exacta de estas
+funciones, pero **no están expuestas en el lenguaje** todavía. Se listan para que
+la API futura no se diseñe a ciegas.
+
+#### Actores (peds)
+```
+request_model(modelo: int)            # 0x0247 -> 0x4087E0
+has_model_loaded(modelo: int) -> bool # 0x0248
+load_all_models()                     # 0x0249
+create_actor(tipo, modelo, x, y, z) -> handle   # 0x009A
+delete_actor(handle)                  # 0x009B
+get_actor_coords(handle) -> (x, y, z) # 0x00A0
+set_actor_coords(handle, x, y, z)     # 0x00A1
+```
+Evidencia: [`evidence/actors.md`](evidence/actors.md).
+
+#### Blips del radar
+```
+add_blip(x, y, z) -> blip             # 0x018A
+add_blip_sprite(x, y, z, sprite)      # 0x02A8
+add_blip_contact(x, y, z, sprite)     # 0x02A7
+add_blip_car(coche)                   # 0x0186
+add_blip_actor(actor)                 # 0x0187
+set_blip_colour(blip, color)          # 0x583AB0
+set_blip_scale(blip, escala)          # 0x583CC0
+set_blip_sprite(blip, sprite)         # 0x583D70
+set_blip_display(blip, modo)          # 0x583D20
+remove_blip(blip)                     # 0x587CE0
+```
+Evidencia: [`evidence/blips.md`](evidence/blips.md).
+
+#### Marcadores y coronas
+```
+marker_icon(x, y, z, sprite) -> blip  # 0x04CE (blip SHORT_RANGE, tipo 4)
+marker_asset(x, y, z, sprite) -> blip # 0x0570 (tipo 5)
+corona_create(x, y, z, radio, tipo, flare, r, g, b)   # 0x024F
+corona_draw(id, x, y, z, radio, tipo, flare, r, g, b) # 0x04D5
+```
+Evidencia: [`evidence/markers.md`](evidence/markers.md).
+
+#### Nivel de búsqueda
+```
+player.wanted_level = n      # 0x010D -> CPed::SetWantedLevel (0..max)
+player.wanted_no_drop = n    # 0x010E (solo sube)
+player.clear_wanted()        # 0x0110
+player.is_wanted(n) -> bool  # 0x010F (nivel actual > n)
+player.max_wanted            # 0x050F / 0x01F0 (0..6)
+player.wanted_multiplier     # 0x03C7 (float)
+```
+Evidencia: [`evidence/wanted.md`](evidence/wanted.md).
 
 ---
 

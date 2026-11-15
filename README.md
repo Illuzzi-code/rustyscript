@@ -73,6 +73,20 @@ VM: CallNative(SpawnRhino, argc=0) -> RustyScript: spawn @ 0x0043A4A0
 - Corregir la asignación de slots de variables locales en bloques anidados.
 - Implementar el límite de 16 scripts y los diagnósticos `W02` / `E12`.
 
+### Fase 3.5 — investigación cerrada, implementación pendiente
+
+Las cuatro áreas que faltaban para “actores, marcadores, iconos, wanted y blips” ya
+están **verificadas contra el ejecutable** y documentadas en `docs/evidence/`, pero
+todavía **no tienen nativa**. Orden sugerido de implementación y prueba (de menor a
+mayor riesgo): blips → wanted → coronas → marcadores → actores.
+
+| Ficha | Contenido |
+|---|---|
+| [`evidence/actors.md`](docs/evidence/actors.md) | pool de peds, handles, `CREATE_CHAR`/`DELETE_CHAR`, streaming |
+| [`evidence/blips.md`](docs/evidence/blips.md) | `tRadarTrace`, 175 slots, `SetCoordBlip`/`SetEntityBlip`, opcodes |
+| [`evidence/markers.md`](docs/evidence/markers.md) | `0x04CE`/`0x0570`, `CCoronas::RegisterCorona`, 64 slots |
+| [`evidence/wanted.md`](docs/evidence/wanted.md) | cadena `Players→CPlayerInfo→CWanted`, caos, opcodes |
+
 ---
 
 ## Arquitectura
@@ -152,6 +166,10 @@ on key F2 {
 Desactivadas o ausentes en esta versión: `player.money`, `player.wanted_level`,
 `spawn_vehicle(id)`, `give_weapon(id, ammo)`. Se activarán solo tras confirmarlas en juego.
 
+Investigadas y documentadas, **sin native todavía**: actores (crear/borrar/teletransportar),
+blips del radar, marcadores/iconos, coronas y nivel de búsqueda completo. La API propuesta
+y la evidencia están en `docs/evidence/actors.md`, `blips.md`, `markers.md` y `wanted.md`.
+
 ---
 
 ## Compilar
@@ -195,9 +213,20 @@ ImageBase `0x00400000`, sin ASLR.
 | Punto de hook (`CALL`) | `0x53E981` | ALTA |
 | `CHud::SetHelpMessage` | `0x588BE0` | ALTA |
 | `CMessages::AddMessageJumpQ` | `0x69F1E0` | ALTA |
-| `CWorld::Players` | `0xB74490` (doble deref) | ALTA |
+| `CPools::ms_pPedPool` | `0xB74490` (doble deref) | ALTA |
+| `CWorld::Players` | `0xB7CD98`, stride `0x190` | ALTA |
 | `CPed` health / max / armor | `+0x540` / `+0x544` / `+0x548` | ALTA |
 | `CPed` posición x/y/z | `+0x44` / `+0x48` / `+0x4C` | ALTA |
+| `CPed::m_pPlayerData` | `+0x480` | ALTA |
+| `CPlayerData::m_pWanted` | `+0x00` (`CPlayerInfo+0x04`) | ALTA |
+| `CWanted::m_nWantedLevel` | `+0x2C` | ALTA |
+| `CWanted::m_fMultiplier` | `+0x14` | ALTA |
+| `CPools::GetPed` / `GetPedRef` | `0x54FF90` / `0x54FF60` | ALTA |
+| `CRadar::ms_RadarTrace` | `0xBA86F0`, 175 × `0x28` | ALTA |
+| `CRadar::SetCoordBlip` | `0x583820` | ALTA |
+| `CCoronas::RegisterCorona` | `0x6FC180` (tipo: `0x6FC580`) | ALTA |
+| `CCoronas::aCoronas` | `0xC3E058`, 64 × `0x3C` | ALTA |
+| `CWanted::SetWantedLevel` | `0x562470` | ALTA |
 | `CClock` horas / minutos | `0xB70153` / `0xB70152` | ALTA |
 | `CWeather` old / new | `0xC81320` / `0xC81324` | ALTA |
 | Stubs de spawn por truco | `0x43A4A0` … `0x43A550` | ALTA |
