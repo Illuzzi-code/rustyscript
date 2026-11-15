@@ -1,21 +1,25 @@
 // hud.rs — Muestra mensajes en pantalla usando funciones del juego.
 //
-// AddMessageJumpQ @ 0x69F1E0: __cdecl (char* text, u16 time_ms, i16 flag, i32 unk)
+// AddMessageJumpQ @ 0x69F1E0: __cdecl (char* text, u32 time_ms, u32 flags, u32 add_to_briefs)
 // SetHelpMessage  @ 0x588BE0: __cdecl (char* text, bool quick, bool permanent, bool beep)
 //
-// IMPORTANTE: GTA SA usa GXT keys O texto directo con el prefijo correcto.
-// AddMessageJumpQ acepta texto GXT key; para texto libre se usa el mecanismo
-// de texto de ayuda (SetHelpMessage) que sí acepta cadenas arbitrarias.
+// IMPORTANTE: AddMessageJumpQ NO copia el texto: guarda el puntero del llamante
+// en DAT_00C1A7F0 y el render lo lee en frames posteriores.  El buffer de `text`
+// debe seguir vivo hasta que el mensaje expire (ver src/script/natives.rs).
+// SetHelpMessage sí copia el texto, por eso `show_help` no tiene ese problema.
 
 use crate::game::{ADD_MESSAGE_JUMPQ, SET_HELP_MESSAGE};
 
 /// Muestra un mensaje en la esquina inferior izquierda durante `time_ms` ms.
-/// `text` debe ser una GXT key terminada en nulo (máx 7 chars + \0).
-/// Usar con cadenas estáticas en el binario.
-pub unsafe fn show_message(text: *const u8, time_ms: u16) {
-    let fn_ptr: unsafe extern "C" fn(*const u8, u16, i16, i32) =
+///
+/// `text` debe ser una cadena UTF-8/ASCII terminada en nulo y **seguir viva**
+/// mientras el mensaje esté en pantalla (AddMessageJumpQ solo guarda el puntero).
+/// Para texto dinámico usar `script::natives::show_message`, que copia el texto a
+/// un ring estático persistente.
+pub unsafe fn show_message(text: *const u8, time_ms: u32) {
+    let fn_ptr: unsafe extern "C" fn(*const u8, u32, u32, u32) =
         core::mem::transmute(ADD_MESSAGE_JUMPQ);
-    fn_ptr(text, time_ms, 1, 0);
+    fn_ptr(text, time_ms, 1, 1);
 }
 
 /// Muestra texto de ayuda (caja amarilla) en pantalla.

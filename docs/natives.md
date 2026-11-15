@@ -82,13 +82,17 @@ Las de confianza MEDIA aparecen en el código pero desactivadas (`#[cfg(feature=
 - **Prueba:** pendiente visibilidad en pantalla (el texto llegó al juego vía F6/F7 sin crash)
 - **Nota:** acepta strings UTF-8 terminadas en null; no GXT keys
 
-### `show_message(<texto>)` — mensaje esquina inferior
+### `show_message(<texto>, <ms>)` — mensaje esquina inferior
 - **Función:** `CMessages::AddMessageJumpQ @ 0x69F1E0`
 - **Firma:** `81 EC 20 03 00 00 56 8B` ✅
-- **Convención:** `__cdecl(text: *const u8, time_ms: u16, flag: i16, unk: i32)`
-- **Confianza:** ALTA ✅ (2 callers confirmados, `ADD ESP,10h` = cdecl 4 args)
-- **Prueba:** pendiente — necesita GXT key o prueba con string directa
+- **Convención:** `__cdecl(text: *const u8, time_ms: u32, flags: u32, add_to_briefs: u32)`
+- **Llamada:** `(texto, ms, 1, 1)` — igual que el caller interno del juego
+- **Confianza:** ALTA ✅ (decompilado con Ghidra; ver `docs/evidence/show_message_lifetime.md`)
+- **Aviso:** `AddMessageJumpQ` **no copia** el texto, guarda el puntero. La nativa
+  copia el texto a un ring estático de 32 × 400 bytes (CP1252) para que siga
+  vivo mientras el mensaje está en pantalla.
 - **Validación:** requiere exactamente dos argumentos; `time_ms` debe estar entre 0 y 65535
+- **Prueba:** pendiente de confirmación visual en juego
 
 ---
 

@@ -112,10 +112,11 @@ tested      = false   # no crash, texto pendiente de confirmar visible
 name        = "show_message"
 address     = "0x69F1E0"
 convention  = "cdecl"
-signature   = "fn(text: *const u8, time_ms: u16, flag: i16, unk: i32)"
+signature   = "fn(text: *const u8, time_ms: u32, flags: u32, add_to_briefs: u32)"
 confidence  = "high"
 active      = true
-evidence    = "docs/evidence/add_message_jumpq.md"
+evidence    = "docs/evidence/show_message_lifetime.md"
+note        = "No copia el texto: guarda el puntero en DAT_00C1A7F0. El mod usa un ring estático de 32x400 bytes."
 tested      = false
 
 # ── Mundo — tiempo y clima ─────────────────────────────────────────────────

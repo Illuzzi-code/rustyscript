@@ -65,7 +65,7 @@ VM: CallNative(SpawnRhino, argc=0) -> RustyScript: spawn @ 0x0043A4A0
 
 ### Pendiente para cerrar la Fase 3
 
-- Confirmar visualmente que `show_help` / `show_message` muestran el texto en pantalla.
+- Confirmar visualmente que `show_message` muestra el texto (tras el arreglo de lifetime; `show_help` ya confirmado).
 - Confirmar que los vehículos spawneados aparecen realmente junto al jugador.
 - Validar la reanudación de `wait()` con el presupuesto de frame.
 - Probar las nativas de confianza MEDIA antes de activarlas (`player.money`, `player.wanted_level`, `spawn_vehicle`).

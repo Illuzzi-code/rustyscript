@@ -11,8 +11,13 @@
 
 ## Prototipo
 ```rust
-fn AddMessageJumpQ(text: *const u8, time_ms: u16, flag: i16, unk: i32);
+fn AddMessageJumpQ(text: *const u8, time_ms: u32, flags: u32, add_to_briefs: u32);
 ```
+
+> **Lifetime:** esta función NO copia `text`. Guarda el puntero en
+> `DAT_00C1A7F0` y el render lo lee en frames posteriores. El buffer debe ser
+> persistente. Detalle completo en
+> [`show_message_lifetime.md`](show_message_lifetime.md).
 
 ## Evidencia
 

@@ -207,10 +207,13 @@ player.z             # float, solo lectura
 ```
 show_help(texto: string)
 # Muestra el texto en la caja amarilla de ayuda.
-# El texto puede ser cualquier cadena UTF-8 (máx 127 chars).
+# Acepta cualquier cadena (máx 127 caracteres); se convierte a CP1252.
+# La propia función del juego copia el texto, así que es seguro.
 
 show_message(texto: string, tiempo_ms: int)
 # Muestra un mensaje en la parte inferior izquierda durante tiempo_ms ms.
+# El motor del juego NO copia el texto: el mod lo guarda en un buffer
+# persistente para que siga visible mientras dure el mensaje.
 ```
 
 ### Mundo

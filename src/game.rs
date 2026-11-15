@@ -20,8 +20,10 @@ pub const CGAME_PROCESS: usize = 0x53BEE0;
 
 /// CMessages::AddMessageJumpQ — mensaje en esquina inferior izquierda.
 /// Firma: 81 EC 20 03 00 00 56 8B B4 24 28 03 00 00 68 90
-/// Convención: __cdecl  args: (*const u8, u16, i16, i32)
-/// Confianza: ALTA  Prueba: pendiente
+/// Convención: __cdecl  args: (*const u8, u32 time_ms, u32 flags, u32 add_to_briefs)
+/// AVISO: no copia el texto; guarda el puntero en DAT_00C1A7F0 (0xC1A7F0) y el
+/// render lo usa en frames posteriores.  El buffer debe ser persistente.
+/// Confianza: ALTA  Prueba: docs/evidence/add_message_jumpq.md
 pub const ADD_MESSAGE_JUMPQ: usize = 0x69F1E0;
 
 /// CHud::SetHelpMessage — caja amarilla de ayuda en pantalla.
