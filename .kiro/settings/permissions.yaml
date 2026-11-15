@@ -1,0 +1,4 @@
+rules:
+  - capability: shell
+    match: ["git *", "npm *", "python *", "powershell *"]
+    effect: allow

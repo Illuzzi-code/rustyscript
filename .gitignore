@@ -1,0 +1,16 @@
+# Build artifacts
+/target/
+
+# Local analysis workspace: contains the proprietary game executable,
+# Ghidra project data and tool logs. Never commit.
+/work/
+
+# Logs and local run output
+*.log
+RustyMod.log
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

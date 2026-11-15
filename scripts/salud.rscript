@@ -1,0 +1,16 @@
+# salud.rscript — Script de prueba básico
+
+on start {
+    show_help("RustyScript cargado")
+}
+
+on key F6 {
+    player.health = player.max_health
+    show_help("Salud restaurada")
+    show_message("claro que si bro", 3000)   # texto, duración en ms
+}
+
+on key F7 {
+    player.armor = 100.0
+    show_help("Armadura restaurada")
+}

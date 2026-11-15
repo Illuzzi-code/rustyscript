@@ -1,0 +1,15 @@
+# secuencia.rscript — Demostracion de wait()
+# Spawnea un Rhino, espera 3 segundos, spawnea un Hydra, espera 2 segundos, cura.
+
+on key F2 {
+    show_help("Iniciando secuencia...")
+    wait(1000)
+    spawn_rhino()
+    show_help("Rhino creado")
+    wait(3000)
+    spawn_hydra()
+    show_help("Hydra creada")
+    wait(2000)
+    player.health = player.max_health
+    show_help("Secuencia completa")
+}

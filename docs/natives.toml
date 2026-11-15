@@ -1,0 +1,206 @@
+# natives.toml — Catálogo de funciones nativas para RustyScript
+# Versión: GTA San Andreas 1.0 US
+# SHA-256: F01A00CE950FA40CA1ED59DF0E789848C6EDCF6405456274965885D0929343AC
+#
+# Campos:
+#   name        = nombre expuesto en el lenguaje
+#   address     = VA en el exe (funciones) o "direct_write" para globales
+#   confidence  = "high" | "medium" | "low"
+#   active      = true si se puede usar en scripts
+#   convention  = "cdecl" | "thiscall" | "direct_write" | "direct_read"
+#   evidence    = ruta al fichero de evidencia
+
+# ── Jugador ────────────────────────────────────────────────────────────────
+
+[[native]]
+name        = "player.health"
+address     = "direct_write"
+offset_chain= ["0xB74490", "+0x00", "+0x540"]
+type        = "f32"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/ped_offsets.md"
+tested      = true
+test_result = "23.6 → 100.1 in-game confirmed"
+
+[[native]]
+name        = "player.max_health"
+address     = "direct_read"
+offset_chain= ["0xB74490", "+0x00", "+0x544"]
+type        = "f32"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/ped_offsets.md"
+tested      = true
+test_result = "100.1 read in-game"
+
+[[native]]
+name        = "player.armor"
+address     = "direct_write"
+offset_chain= ["0xB74490", "+0x00", "+0x548"]
+type        = "f32"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/ped_offsets.md"
+tested      = true
+test_result = "0.0 → 100.0 in-game confirmed"
+
+[[native]]
+name        = "player.x"
+address     = "direct_read"
+offset_chain= ["0xB74490", "+0x00", "+0x44"]
+type        = "f32"
+confidence  = "high"
+active      = true   # solo lectura en scripts
+evidence    = "docs/evidence/ped_position.md"
+tested      = false
+
+[[native]]
+name        = "player.y"
+address     = "direct_read"
+offset_chain= ["0xB74490", "+0x00", "+0x48"]
+type        = "f32"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/ped_position.md"
+tested      = false
+
+[[native]]
+name        = "player.z"
+address     = "direct_read"
+offset_chain= ["0xB74490", "+0x00", "+0x4C"]
+type        = "f32"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/ped_position.md"
+tested      = false
+
+[[native]]
+name        = "player.money"
+address     = "direct_write"
+offset_chain= ["0xB74490", "+0xB8"]
+type        = "i32"
+confidence  = "medium"
+active      = false   # desactivado hasta prueba en juego
+evidence    = "docs/evidence/player_money.md"
+tested      = false
+
+[[native]]
+name        = "player.wanted_level"
+address     = "direct_write"
+offset_chain= ["0xB74490", "+0x00", "+0x484", "+0x08"]
+type        = "u32"
+clamp       = "0..6"
+confidence  = "medium"
+active      = false
+evidence    = "docs/evidence/ped_offsets.md"
+tested      = false
+
+# ── Pantalla ───────────────────────────────────────────────────────────────
+
+[[native]]
+name        = "show_help"
+address     = "0x588BE0"
+convention  = "cdecl"
+signature   = "fn(text: *const u8, quick: u8, permanent: u8, beep: u8)"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/set_help_message.md"
+tested      = false   # no crash, texto pendiente de confirmar visible
+
+[[native]]
+name        = "show_message"
+address     = "0x69F1E0"
+convention  = "cdecl"
+signature   = "fn(text: *const u8, time_ms: u16, flag: i16, unk: i32)"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/add_message_jumpq.md"
+tested      = false
+
+# ── Mundo — tiempo y clima ─────────────────────────────────────────────────
+
+[[native]]
+name        = "set_time"
+address     = "direct_write"
+globals     = ["hours:0xB70153:u8", "minutes:0xB70152:u8"]
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/clock_weather.md"
+tested      = false
+
+[[native]]
+name        = "get_time"
+address     = "direct_read"
+globals     = ["hours:0xB70153:u8", "minutes:0xB70152:u8"]
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/clock_weather.md"
+tested      = false
+
+[[native]]
+name        = "set_weather"
+address     = "direct_write"
+globals     = ["old:0xC81320:u16", "new:0xC81324:u16"]
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/clock_weather.md"
+tested      = false
+
+# ── Vehículos — spawn via stubs de cheats ─────────────────────────────────
+
+[[native]]
+name        = "spawn_rhino"
+address     = "0x43A4A0"
+convention  = "cdecl"
+signature   = "fn()"   # stub: PUSH 432; CALL core; POP; RET
+confidence  = "high"
+active      = true   # stub verificado en tabla de cheats
+evidence    = "docs/evidence/vehicle_cheat_stub.md"
+tested      = false
+
+[[native]]
+name        = "spawn_hydra"
+address     = "0x43A530"
+convention  = "cdecl"
+signature   = "fn()"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/vehicle_cheat_stub.md"
+tested      = false
+
+[[native]]
+name        = "spawn_hunter"
+address     = "0x43A550"
+convention  = "cdecl"
+signature   = "fn()"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/vehicle_cheat_stub.md"
+tested      = false
+
+[[native]]
+name        = "spawn_monster"
+address     = "0x43A4F0"
+convention  = "cdecl"
+signature   = "fn()"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/vehicle_cheat_stub.md"
+tested      = false
+
+[[native]]
+name        = "spawn_hotring"
+address     = "0x43A4D0"
+convention  = "cdecl"
+signature   = "fn()"
+confidence  = "high"
+active      = true
+evidence    = "docs/evidence/vehicle_cheat_stub.md"
+tested      = false
+
+# ── Armas — pendiente ─────────────────────────────────────────────────────
+
+# give_weapon: función no verificada en este binario.
+# CPed::AddWeapon @ 0x4474A0 (plugin-sdk) es interior de código (0 callers).
+# Estado: BAJA confianza — no se incluye hasta análisis con Ghidra.

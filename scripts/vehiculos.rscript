@@ -1,0 +1,11 @@
+# vehiculos.rscript — Spawn de vehiculos
+
+on key F3 {
+    spawn_rhino()
+    show_help("Rhino invocado")
+}
+
+on key F4 {
+    spawn_hydra()
+    show_help("Hydra invocada")
+}
