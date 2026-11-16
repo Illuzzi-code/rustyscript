@@ -345,6 +345,26 @@ impl<'a> Lexer<'a> {
     // ── Numeric literal ──────────────────────────────────────────────────────
 
     fn lex_number(&mut self, first: char) -> TokenKind {
+        // Hex literal: 0x… or 0X…
+        if first == '0' && !self.at_end() {
+            let next = self.peek();
+            if next == 'x' || next == 'X' {
+                self.advance(); // consume 'x'
+                let mut hex = String::new();
+                while !self.at_end() {
+                    let c = self.peek();
+                    if c.is_ascii_hexdigit() {
+                        hex.push(c);
+                        self.advance();
+                    } else {
+                        break;
+                    }
+                }
+                let val = parse_hex(&hex);
+                return TokenKind::Int(val);
+            }
+        }
+
         let mut raw = String::new();
         raw.push(first);
         let mut is_float = false;
@@ -364,7 +384,6 @@ impl<'a> Lexer<'a> {
         }
 
         if is_float {
-            // Parse f32; on failure fall back to 0.0 (unreachable in valid source).
             let val = parse_f32(&raw);
             TokenKind::Float(val)
         } else {
@@ -439,6 +458,20 @@ impl<'a> Lexer<'a> {
 }
 
 // ── Simple numeric parsers (no_std — cannot use str::parse) ─────────────────
+
+fn parse_hex(s: &str) -> i32 {
+    let mut acc: u32 = 0;
+    for b in s.bytes() {
+        let digit = match b {
+            b'0'..=b'9' => b - b'0',
+            b'a'..=b'f' => b - b'a' + 10,
+            b'A'..=b'F' => b - b'A' + 10,
+            _ => continue,
+        };
+        acc = acc.saturating_mul(16).saturating_add(digit as u32);
+    }
+    acc as i32
+}
 
 fn parse_i32(s: &str) -> i32 {
     let (s, neg) = if s.starts_with('-') { (&s[1..], true) } else { (s, false) };

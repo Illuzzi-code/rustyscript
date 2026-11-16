@@ -336,6 +336,17 @@ impl Parser {
     fn parse_key_name(&mut self) -> Result<u8, ParseError> {
         match self.cur().kind.clone() {
             TokenKind::KeyName(vk) => { self.advance(); Ok(vk) }
+            // Permitir literales numéricos (incluyendo hex 0x..) como VK code
+            TokenKind::Int(v) => {
+                if v < 0 || v > 255 {
+                    return Err(ParseError {
+                        msg:  format!("VK code fuera de rango: {}", v),
+                        line: self.cur_line(),
+                    });
+                }
+                self.advance();
+                Ok(v as u8)
+            }
             _ => Err(ParseError {
                 msg:  format!("error[E06]: unknown key: {:?}", self.peek_kind()),
                 line: self.cur_line(),
