@@ -90,10 +90,99 @@ pub const PED_OFFSET_X: usize = 0x44;
 pub const PED_OFFSET_Y: usize = 0x48;
 pub const PED_OFFSET_Z: usize = 0x4C;
 
-/// CPlayerPed::m_pWanted — puntero a CWanted (u32 ptr).
-/// [ped+0x484]+0x08 = m_nWantedLevel (u32, 0–6).
-/// Confianza: MEDIA — pendiente confirmación en juego.
-pub const PED_OFFSET_WANTED_PTR: usize = 0x484;
+/// CPlayerPed::m_pPlayerData — puntero a CPlayerData (u32 ptr).
+/// Solo válido en peds de jugador.  Deref: [ped+0x480] = CPlayerData*.
+/// Confianza: ALTA  Xrefs: 7  Prueba: docs/evidence/wanted.md
+pub const PED_OFFSET_PLAYER_DATA: usize = 0x480;
+
+// ── Wanted level ───────────────────────────────────────────────────────────
+
+/// CWanted::SetWantedLevel — fija nivel (0..6) calculando caos.
+/// Convención: __thiscall (ECX = CWanted*), 1 argumento (level: i32)
+/// Confianza: ALTA  Xrefs: 4  Prueba: docs/evidence/wanted.md §6
+pub const CWANTED_SET_WANTED_LEVEL: usize = 0x562470;
+
+/// CWanted::SetWantedLevelNoDrop — solo sube el nivel.
+/// Convención: __thiscall (ECX = CWanted*), 1 argumento
+/// Confianza: ALTA  Xrefs: 2
+pub const CWANTED_SET_WANTED_LEVEL_NO_DROP: usize = 0x562570;
+
+/// SetMaximumWantedLevel — fija el techo global (0..6).
+/// Convención: __cdecl, 1 argumento (level: i32)
+/// Confianza: ALTA  Xrefs: 2
+pub const SET_MAX_WANTED_LEVEL: usize = 0x561E70;
+
+/// CWorld::Players — array de CPlayerInfo (stride 0x190).
+/// El jugador 0 está en *(0xB7CD98 + 0x00).
+/// Confianza: ALTA  Xrefs: 376  Prueba: in-game confirmada
+pub const CWORLD_PLAYERS_NEW: usize = 0xB7CD98;
+
+/// CWorld::PlayerInFocus — índice del jugador activo (u8).
+pub const CWORLD_PLAYER_IN_FOCUS: usize = 0xB7CD74;
+
+/// Offset de m_nWantedLevel en CWanted (u32, 0..6).
+pub const CWANTED_OFFSET_WANTED_LEVEL: usize = 0x2C;
+
+/// Offset de m_pWanted en CPlayerData (CWanted*).
+pub const CPLAYERDATA_OFFSET_PWANTED: usize = 0x00;
+
+// ── Blips del radar ────────────────────────────────────────────────────────
+
+/// CRadar::SetCoordBlip — crea un blip en coordenadas; devuelve handle (i32).
+/// Convención: __cdecl  args: (type:u8, x:f32, y:f32, z:f32, ignored:u32, display:u8)
+/// Confianza: ALTA  Xrefs: 8  Prueba: docs/evidence/blips.md §10
+pub const RADAR_SET_COORD_BLIP: usize = 0x583820;
+
+/// CRadar::SetShortRangeCoordBlip — igual + marca m_bShortRange.
+/// Confianza: ALTA  Xrefs: 2
+pub const RADAR_SET_SHORT_RANGE_COORD_BLIP: usize = 0x583920;
+
+/// CRadar::ChangeBlipColour — cambia color del blip.
+/// Convención: __cdecl  args: (handle:i32, colour:u32)
+/// Confianza: ALTA  Xrefs: 6
+pub const RADAR_CHANGE_BLIP_COLOUR: usize = 0x583AB0;
+
+/// CRadar::ChangeBlipScale — cambia escala del blip.
+/// Convención: __cdecl  args: (handle:i32, size:u32)
+/// Confianza: ALTA  Xrefs: 11
+pub const RADAR_CHANGE_BLIP_SCALE: usize = 0x583CC0;
+
+/// CRadar::ChangeBlipDisplay — cambia modo de display (0..3).
+/// Convención: __cdecl  args: (handle:i32, display:u32)
+/// Confianza: ALTA  Xrefs: 3
+pub const RADAR_CHANGE_BLIP_DISPLAY: usize = 0x583D20;
+
+/// CRadar::SetBlipSprite — asigna sprite de icono (1..63; 0 = ninguno).
+/// Convención: __cdecl  args: (handle:i32, sprite:u8)
+/// Confianza: ALTA  Xrefs: 5
+pub const RADAR_SET_BLIP_SPRITE: usize = 0x583D70;
+
+/// CRadar::ClearBlip — elimina un blip por handle.
+/// Convención: __cdecl  args: (handle:i32)
+/// Confianza: ALTA  Xrefs: 5
+pub const RADAR_CLEAR_BLIP: usize = 0x587CE0;
+
+// ── Coronas 3D ─────────────────────────────────────────────────────────────
+
+/// CCoronas::RegisterCorona — variante "textura explícita".
+/// Convención: __cdecl  21 argumentos; ver docs/evidence/markers.md §4.
+/// Firma real del thunk (sobrearga de tipo): 0x6FC580 reemplaza arg 8 por
+/// gpCoronaTexture[tipo] y salta aquí.
+/// Confianza: ALTA  Xrefs: múltiples
+pub const CORONAS_REGISTER_CORONA: usize = 0x6FC180;
+
+/// CCoronas::RegisterCorona overload "por tipo" (0x6FC580):
+/// arg 8 = tipo (u8) → gpCoronaTexture[tipo] (RwTexture*).
+pub const CORONAS_REGISTER_CORONA_TYPE: usize = 0x6FC580;
+
+/// gpCoronaTexture — array de RwTexture* (un puntero por tipo).
+pub const GP_CORONA_TEXTURE: usize = 0xC3E000;
+
+/// aCoronas — array de 64 slots, stride 0x3C.
+pub const A_CORONAS: usize = 0xC3E058;
+
+/// NumCoronas — contador de coronas activas (u32).
+pub const NUM_CORONAS: usize = 0xC3E038;
 
 // ── Offsets dentro de CPlayerInfo ─────────────────────────────────────────
 

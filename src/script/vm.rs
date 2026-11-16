@@ -512,12 +512,25 @@ fn load_field(f: &NativeField) -> Result<Value, VmError> {
                 Ok(Value::Float(v))
             }
             NativeField::Money => {
-                // MEDIA confidence — returns Nil until verified
-                Ok(Value::Nil)
+                // MEDIA confidence — returns 0 until verified in-game
+                Ok(Value::Int(0))
             }
             NativeField::WantedLevel => {
-                // MEDIA confidence — returns Nil until verified
-                Ok(Value::Nil)
+                // Lee m_nWantedLevel (+0x2C) desde la cadena Players[0]->m_pPed->m_pPlayerData->m_pWanted.
+                // Safety: get_ped() valida el puntero; los offsets están verificados en docs/evidence/wanted.md.
+                let ped = crate::player::get_ped();
+                if ped.is_null() { return Ok(Value::Int(0)); }
+                let player_data_ptr = (ped.add(crate::game::PED_OFFSET_PLAYER_DATA) as *const usize).read();
+                if player_data_ptr == 0 { return Ok(Value::Int(0)); }
+                let wanted_ptr = (player_data_ptr as *const usize).read();
+                if wanted_ptr == 0 { return Ok(Value::Int(0)); }
+                let level = ((wanted_ptr + crate::game::CWANTED_OFFSET_WANTED_LEVEL) as *const u32).read();
+                Ok(Value::Int(level.min(6) as i32))
+            }
+            NativeField::MaxWanted => {
+                // Lee el nivel máximo global en 0x8CDEE4.
+                let level = (0x8CDEE4_usize as *const u32).read();
+                Ok(Value::Int(level.min(6) as i32))
             }
         }
     }
@@ -541,8 +554,32 @@ fn store_field(f: &NativeField, v: Value) -> Result<(), VmError> {
             NativeField::X | NativeField::Y | NativeField::Z => {
                 // position is read-only in v0.1
             }
-            NativeField::Money | NativeField::WantedLevel => {
+            NativeField::Money => {
                 // MEDIA confidence — ignore until verified
+            }
+            NativeField::WantedLevel => {
+                // Escribe vía CWanted::SetWantedLevel para mantener caos y HUD sincronizados.
+                // Mismo código que native_set_wanted para evitar duplicar la cadena.
+                let level = match &v {
+                    Value::Int(i)   => (*i).clamp(0, 6),
+                    Value::Float(f) => (*f as i32).clamp(0, 6),
+                    _ => return Err(VmError::new("wanted_level: expected int")),
+                };
+                let _ = crate::script::natives::call_native(
+                    &crate::script::compiler::NativeFunc::SetWanted,
+                    &[Value::Int(level)],
+                );
+            }
+            NativeField::MaxWanted => {
+                let level = match &v {
+                    Value::Int(i)   => (*i).clamp(0, 6),
+                    Value::Float(f) => (*f as i32).clamp(0, 6),
+                    _ => return Err(VmError::new("max_wanted: expected int")),
+                };
+                let _ = crate::script::natives::call_native(
+                    &crate::script::compiler::NativeFunc::SetMaxWanted,
+                    &[Value::Int(level)],
+                );
             }
         }
     }

@@ -70,6 +70,7 @@ pub enum NativeField {
     Z,
     Money,
     WantedLevel,
+    MaxWanted,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -105,6 +106,20 @@ pub enum NativeFunc {
     SpawnStretch,
     SpawnCaddy,
     Wait,
+    // Blips
+    AddBlip,
+    AddBlipSprite,
+    SetBlipColour,
+    SetBlipScale,
+    SetBlipSprite,
+    SetBlipDisplay,
+    RemoveBlip,
+    // Wanted
+    SetWanted,
+    ClearWanted,
+    SetMaxWanted,
+    // Coronas
+    DrawCorona,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -674,27 +689,42 @@ fn ident_to_native_field(s: &str) -> Option<NativeField> {
         "z"            => Some(NativeField::Z),
         "money"        => Some(NativeField::Money),
         "wanted_level" => Some(NativeField::WantedLevel),
+        "max_wanted"   => Some(NativeField::MaxWanted),
         _              => None,
     }
 }
 
 fn ident_to_native_func(s: &str) -> Option<NativeFunc> {
     match s {
-        "show_help"     => Some(NativeFunc::ShowHelp),
-        "show_message"  => Some(NativeFunc::ShowMessage),
-        "set_time"      => Some(NativeFunc::SetTime),
-        "get_hour"      => Some(NativeFunc::GetHour),
-        "get_minute"    => Some(NativeFunc::GetMinute),
-        "set_weather"   => Some(NativeFunc::SetWeather),
-        "spawn_rhino"   => Some(NativeFunc::SpawnRhino),
-        "spawn_hydra"   => Some(NativeFunc::SpawnHydra),
-        "spawn_hunter"  => Some(NativeFunc::SpawnHunter),
-        "spawn_monster" => Some(NativeFunc::SpawnMonster),
-        "spawn_hotring" => Some(NativeFunc::SpawnHotring),
-        "spawn_stretch" => Some(NativeFunc::SpawnStretch),
-        "spawn_caddy"   => Some(NativeFunc::SpawnCaddy),
-        "wait"          => Some(NativeFunc::Wait),
-        _               => None,
+        "show_help"      => Some(NativeFunc::ShowHelp),
+        "show_message"   => Some(NativeFunc::ShowMessage),
+        "set_time"       => Some(NativeFunc::SetTime),
+        "get_hour"       => Some(NativeFunc::GetHour),
+        "get_minute"     => Some(NativeFunc::GetMinute),
+        "set_weather"    => Some(NativeFunc::SetWeather),
+        "spawn_rhino"    => Some(NativeFunc::SpawnRhino),
+        "spawn_hydra"    => Some(NativeFunc::SpawnHydra),
+        "spawn_hunter"   => Some(NativeFunc::SpawnHunter),
+        "spawn_monster"  => Some(NativeFunc::SpawnMonster),
+        "spawn_hotring"  => Some(NativeFunc::SpawnHotring),
+        "spawn_stretch"  => Some(NativeFunc::SpawnStretch),
+        "spawn_caddy"    => Some(NativeFunc::SpawnCaddy),
+        "wait"           => Some(NativeFunc::Wait),
+        // Blips
+        "add_blip"         => Some(NativeFunc::AddBlip),
+        "add_blip_sprite"  => Some(NativeFunc::AddBlipSprite),
+        "set_blip_colour"  => Some(NativeFunc::SetBlipColour),
+        "set_blip_scale"   => Some(NativeFunc::SetBlipScale),
+        "set_blip_sprite"  => Some(NativeFunc::SetBlipSprite),
+        "set_blip_display" => Some(NativeFunc::SetBlipDisplay),
+        "remove_blip"      => Some(NativeFunc::RemoveBlip),
+        // Wanted
+        "set_wanted"     => Some(NativeFunc::SetWanted),
+        "clear_wanted"   => Some(NativeFunc::ClearWanted),
+        "set_max_wanted" => Some(NativeFunc::SetMaxWanted),
+        // Coronas
+        "draw_corona"    => Some(NativeFunc::DrawCorona),
+        _                => None,
     }
 }
 

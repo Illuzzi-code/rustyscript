@@ -654,7 +654,21 @@ impl Compiler {
                     | NativeFunc::SpawnHotring
                     | NativeFunc::SpawnStretch
                     | NativeFunc::SpawnCaddy
-                    | NativeFunc::Wait => {} // allowed
+                    | NativeFunc::Wait
+                    // Blips
+                    | NativeFunc::AddBlip
+                    | NativeFunc::AddBlipSprite
+                    | NativeFunc::SetBlipColour
+                    | NativeFunc::SetBlipScale
+                    | NativeFunc::SetBlipSprite
+                    | NativeFunc::SetBlipDisplay
+                    | NativeFunc::RemoveBlip
+                    // Wanted
+                    | NativeFunc::SetWanted
+                    | NativeFunc::ClearWanted
+                    | NativeFunc::SetMaxWanted
+                    // Coronas
+                    | NativeFunc::DrawCorona => {} // allowed
                 }
                 for arg in args {
                     self.emit_expr(arg, line)?;
@@ -691,5 +705,19 @@ fn native_arity(func: &NativeFunc) -> usize {
         | NativeFunc::SpawnStretch
         | NativeFunc::SpawnCaddy => 0,
         NativeFunc::Wait => 1,
+        // Blips
+        NativeFunc::AddBlip         => 3,  // x, y, z
+        NativeFunc::AddBlipSprite   => 4,  // x, y, z, sprite
+        NativeFunc::SetBlipColour   => 2,  // handle, colour
+        NativeFunc::SetBlipScale    => 2,  // handle, size
+        NativeFunc::SetBlipSprite   => 2,  // handle, sprite
+        NativeFunc::SetBlipDisplay  => 2,  // handle, display
+        NativeFunc::RemoveBlip      => 1,  // handle
+        // Wanted
+        NativeFunc::SetWanted       => 1,  // level (0..6)
+        NativeFunc::ClearWanted     => 0,
+        NativeFunc::SetMaxWanted    => 1,  // max level (0..6)
+        // Coronas
+        NativeFunc::DrawCorona      => 7,  // x, y, z, radius, r, g, b
     }
 }
