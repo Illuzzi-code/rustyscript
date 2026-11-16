@@ -242,6 +242,9 @@ impl Compiler {
 
     fn second_pass(&mut self, ast: &Ast) -> Result<(), CompileError> {
         // Emit global initialisers first (run before any event).
+        // The entry point of this prologue is always ip=0.
+        // We also emit a Halt at the end so it can be run standalone.
+        let init_start = self.current_ip(); // always 0
         for top in ast {
             if let TopLevel::VarDecl { name, init, line } = top {
                 let gidx = self.globals.iter().position(|n| n == name)
@@ -253,6 +256,8 @@ impl Compiler {
                 self.emit(Opcode::Pop);
             }
         }
+        self.emit(Opcode::Halt); // end of init prologue
+        let _ = init_start;      // always 0, documented
 
         // Emit function bodies (jump over them so they're only reached by CallUser).
         for top in ast {

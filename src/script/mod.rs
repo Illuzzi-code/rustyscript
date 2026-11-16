@@ -378,6 +378,12 @@ impl ScriptEngine {
             chunk,
         );
 
+        // Ejecutar el prólogo de inicialización de globals (siempre en ip=0).
+        // Termina en Halt. Debe correr antes de on_start y de cualquier handler.
+        if let Err(e) = state.run_handler_internal(0, None) {
+            crate::log!("ScriptEngine: init error in '{}': {} (line {})", path, e.msg, e.line);
+        }
+
         // Run the on_start handler immediately.
         state.run_start();
 
