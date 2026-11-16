@@ -152,7 +152,7 @@ if (this->m_nWantedLevel < level)
 
 | VA | Símbolo | Valor inicial | Quién lo escribe |
 |---|---|---|---|
-| `0x008CDEE4` | nivel máximo permitido | `6` | `0x01F0` (`0x561E70`) y `0x561C64` (init) |
+| `0x008CDEE4` | nivel máximo permitido | `6` | `0x01F0` (`0x561270`) y `0x561C64` (init) |
 | `0x008CDEE8` | tope de caos del nivel máximo | `0x23F0` (9200) | `0x01F0` y `0x561C64` |
 | `0x00969171` | flag que bloquea cambios de nivel | `0` | `0x004396D4` (lo alterna) |
 
@@ -301,8 +301,8 @@ out = *(u32*)0x008CDEE4;              // nivel máximo actual
    defecto); `UpdateWantedLevel` nunca produce más de 6.
 2. **No escribir `+0x2C` a mano** salvo que se quiera un cambio “cosmético”: el
    HUD, la radio policial y la IA leen además el caos (`+0x00`) y los delitos.
-   La vía correcta es `CWanted::SetWantedLevel` (`0x562470`).
-3. **Usar un ped de jugador.** `0x609F10`/`0x609F30` saltan a `0x562470` con
+   La vía correcta es `CWanted::SetWantedLevel` (`0x561870`).
+3. **Usar un ped de jugador.** `0x609310`/`0x609330` saltan a `0x561870` con
    `ECX = 0` si el ped no tiene `m_pPlayerData`; eso revienta.
 4. **El índice de jugador es 0/1**, no un handle de ped (ver §4).
 5. **`0x01F0` con valores > 6 no hace nada** (no hay clamp: se ignora).
@@ -317,18 +317,16 @@ out = *(u32*)0x008CDEE4;              // nivel máximo actual
 
 ## 6. Firmas verificadas
 
-| VA | Símbolo | Prólogo (16 bytes) | Xrefs |
-|---|---|---|---|
-| `0x00562470` | `CWanted::SetWantedLevel` | `A0 71 91 96 00 84 C0 0F 85 96 00 00 00 A1 E4 DE` | 4 |
-| `0x00562570` | `CWanted::SetWantedLevelNoDrop` | `56 8B F1 8B 46 30 39 46 2C 7D 08 50 8B CE E8 ED` | 2 |
-| `0x00561E70` | `SetMaximumWantedLevel` | `8B 44 24 04 83 F8 06 0F 87 91 00 00 00 FF 24 85` | 2 |
-| `0x00561C90` | `CWanted::UpdateWantedLevel` | `A1 E8 DE 8C 00 56 8B F1 39 06 57 8B 7E 2C 7E 02` | 5 |
-| `0x00609F10` | `CPed::SetWantedLevel` | `8B 81 80 04 00 00 85 C0 74 09 8B 00 8B C8 E9 4D` | 7 |
-| `0x00609F30` | `CPed::SetWantedLevelNoDrop` | `8B 81 80 04 00 00 85 C0 74 09 8B 00 8B C8 E9 2D` | 9 |
-| `0x0056E230` | `Players[i].m_pWanted` | `8B 44 24 04 85 C0 7D 07 0F B6 05 74 CD B7 00 69` | 99 |
-| `0x0156D300` | `CPed::GetWantedLevel` | `8B 81 80 04 00 00 85 C0 74 06 8B 00 8B 40 2C C3` | 0 |
-| `0x0041BE60` | thunk `GetWantedLevel` | `E9 9B 14 15 01 E9 F7 49 FE FF 75 E9 69 7F FE FF` | 26 |
-| `0x004859D0` | `CTheScripts::SetCondResult` | `8A 81 D2 00 00 00 84 C0 74 0B 8A 44 24 04 84 C0` | 214 |
+> **CORRECCIÓN (verificada en binario buscando firma exacta):**
+> Las VAs de Ghidra tenían un offset erróneo. Las direcciones reales son:
+
+| VA | Símbolo | Prólogo (16 bytes) | Conv | RET |
+|---|---|---|---|---|
+| `0x00561870` | `CWanted::SetWantedLevel` | `A0 71 91 96 00 84 C0 0F 85 96 00 00 00 A1 E4 DE` | `__thiscall` | `RET 4` (callee limpia) |
+| `0x00561970` | `CWanted::SetWantedLevelNoDrop` | `56 8B F1 8B 46 30 39 46 2C 7D 08 50 8B CE E8 ED` | `__thiscall` | `RET 4` |
+| `0x00561270` | `SetMaximumWantedLevel` | `8B 44 24 04 83 F8 06 0F 87 91 00 00 00 FF 24 85` | `__cdecl` | `RET` (caller limpia) |
+| `0x00609310` | `CPed::SetWantedLevel` | `8B 81 80 04 00 00 85 C0 74 09 8B 00 8B C8 E9 4D` | `__thiscall` | — |
+| `0x0056E230` | `Players[i].m_pWanted` | `8B 44 24 04 85 C0 7D 07 0F B6 05 74 CD B7 00 69` | `__cdecl` | — |
 
 Globales:
 

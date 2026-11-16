@@ -99,18 +99,21 @@ pub const PED_OFFSET_PLAYER_DATA: usize = 0x480;
 
 /// CWanted::SetWantedLevel — fija nivel (0..6) calculando caos.
 /// Convención: __thiscall (ECX = CWanted*), 1 argumento (level: i32)
-/// Confianza: ALTA  Xrefs: 4  Prueba: docs/evidence/wanted.md §6
-pub const CWANTED_SET_WANTED_LEVEL: usize = 0x562470;
+/// El callee limpia 4 bytes de pila (RET 4). No usar add esp,4 después del call.
+/// Firma verificada en binario: A0 71 91 96 00 84 C0 0F 85 96 00 00 00 A1 E4 DE
+/// VA real: 0x561870  Confianza: ALTA
+pub const CWANTED_SET_WANTED_LEVEL: usize = 0x561870;
 
-/// CWanted::SetWantedLevelNoDrop — solo sube el nivel.
-/// Convención: __thiscall (ECX = CWanted*), 1 argumento
-/// Confianza: ALTA  Xrefs: 2
-pub const CWANTED_SET_WANTED_LEVEL_NO_DROP: usize = 0x562570;
+/// CWanted::SetWantedLevelNoDrop — solo sube el nivel (RET 4, callee limpia).
+/// Firma: 56 8B F1 8B 46 30 39 46 2C  VA real: 0x561970
+/// Confianza: ALTA
+pub const CWANTED_SET_WANTED_LEVEL_NO_DROP: usize = 0x561970;
 
 /// SetMaximumWantedLevel — fija el techo global (0..6).
-/// Convención: __cdecl, 1 argumento (level: i32)
-/// Confianza: ALTA  Xrefs: 2
-pub const SET_MAX_WANTED_LEVEL: usize = 0x561E70;
+/// Convención: __cdecl, RET (caller limpia), 1 argumento (level: i32)
+/// Firma: 8B 44 24 04 83 F8 06 0F 87  VA real: 0x561270
+/// Confianza: ALTA
+pub const SET_MAX_WANTED_LEVEL: usize = 0x561270;
 
 /// CWorld::Players — array de CPlayerInfo (stride 0x190).
 /// El jugador 0 está en *(0xB7CD98 + 0x00).

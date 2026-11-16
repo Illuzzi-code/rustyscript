@@ -493,28 +493,23 @@ fn native_set_max_wanted(args: &[Value]) -> Result<Value, VmError> {
 }
 
 /// Llama a una función __thiscall(this, arg0: i32).
-/// En MSVC 32-bit __thiscall pone `this` en ECX y el resto de args en la pila
-/// (igual que __cdecl).  Rust no tiene ABI thiscall, así que lo emulamos
-/// manualmente: copiamos `this` a ECX, ponemos `arg` en la pila, CALL, restauramos.
+/// En MSVC 32-bit __thiscall: `this` va en ECX, args en la pila.
+/// El CALLEE limpia la pila (RET n), igual que __stdcall.
+/// Por eso NO se hace add esp,4 después del call.
 #[inline(never)]
 unsafe fn call_thiscall_1arg(addr: usize, this: *mut u8, arg: i32) {
-    // Safety: addr es una función __thiscall verificada en el ejecutable.
-    // `this` es un puntero válido a CWanted (comprobado por get_wanted_ptr).
-    // Usamos sub/mov para hacer el push sin la macro push (evita confusión con
-    // options(nostack) en Rust inline asm).
     core::arch::asm!(
-        "mov ecx, {this}",   // ECX = this  (convención __thiscall)
+        "mov ecx, {this}",   // ECX = this
         "sub esp, 4",        // hueco para el argumento
-        "mov [esp], {arg}",  // [esp] = level
-        "call {addr}",       // llama a SetWantedLevel(level) con ECX=this
-        "add esp, 4",        // restaurar pila (cdecl para los args normales)
+        "mov [esp], {arg}",  // [esp] = arg
+        "call {addr}",       // callee hace RET 4 → limpia los 4 bytes
+        // NO add esp, 4 — el callee ya limpió la pila
         this = in(reg) this,
         arg  = in(reg) arg,
         addr = in(reg) addr,
         out("eax") _,
         out("ecx") _,
         out("edx") _,
-        // No ponemos options(nostack) porque SÍ modificamos esp.
     );
 }
 
